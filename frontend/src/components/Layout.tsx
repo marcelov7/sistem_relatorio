@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Navigate, Link } from 'react-router-dom';
+import { Outlet, Navigate, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   BarChart3, 
@@ -13,6 +13,7 @@ import {
 
 const Layout: React.FC = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   if (!user) {
@@ -124,7 +125,10 @@ const Layout: React.FC = () => {
                   Novo Relatório
                 </Link>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    navigate('/login');
+                  }}
                   className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
                   <LogOut className="h-4 w-4 mr-2" />

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 interface User {
@@ -10,7 +9,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
 }
@@ -32,7 +31,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     // Verificar se existe token no localStorage
@@ -49,7 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
       
@@ -67,12 +65,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('auth_token', data.token);
         setUser(data.user);
         toast.success('Login realizado com sucesso!');
-        navigate('/');
+        return true;
       } else {
         toast.error('Credenciais inválidas');
+        return false;
       }
     } catch (error) {
       toast.error('Erro ao fazer login');
+      return false;
     } finally {
       setLoading(false);
     }
@@ -81,7 +81,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('auth_token');
     setUser(null);
-    navigate('/login');
     toast.success('Logout realizado com sucesso!');
   };
 

@@ -1,0 +1,40 @@
+# Dependências
+node_modules/
+vendor/
+composer.lock
+package-lock.json
+
+# Logs
+*.log
+logs/
+storage/logs/
+
+# Cache e arquivos temporários
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+storage/app/public/
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build files
+dist/
+build/
+
+# Docker volumes
+mysql_data/ 
