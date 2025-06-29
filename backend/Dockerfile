@@ -1,8 +1,8 @@
 FROM php:8.2-fpm
 
 # Argumentos
-ARG user
-ARG uid
+ARG user=laravel
+ARG uid=1000
 
 # Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
