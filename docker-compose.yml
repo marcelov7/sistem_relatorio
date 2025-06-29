@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # Backend Laravel
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: relatorio_api
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+      - ./backend/storage/app/public:/var/www/storage/app/public
+    networks:
+      - relatorio_network
+    depends_on:
+      - db
+      - redis
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=relatorio_db
+      - DB_USERNAME=relatorio_user
+      - DB_PASSWORD=relatorio_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: relatorio_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - relatorio_network
+    depends_on:
+      - app
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api
+
+  # Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: relatorio_nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+      - "80:80"
+    volumes:
+      - ./backend:/var/www
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites/:/etc/nginx/sites-available
+      - ./nginx/sites/:/etc/nginx/sites-enabled
+    depends_on:
+      - app
+    networks:
+      - relatorio_network
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: relatorio_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: relatorio_db
+      MYSQL_USER: relatorio_user
+      MYSQL_PASSWORD: relatorio_pass
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - relatorio_network
+
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: relatorio_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - relatorio_network
+
+  # PHPMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: relatorio_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: relatorio_user
+      PMA_PASSWORD: relatorio_pass
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - relatorio_network
+
+volumes:
+  mysql_data:
+
+networks:
+  relatorio_network:
+    driver: bridge 
